@@ -4,11 +4,10 @@ using Amazon.S3.Model;
 using System.IO;
 using Amazon.CognitoIdentity;
 using Amazon;
-
+using Amazon.S3.Transfer;
 
 public class s3upload
 {
-
     private CognitoAWSCredentials credentials;
     private string backetNameString;
     private RegionEndpoint regionVal;
@@ -27,6 +26,7 @@ public class s3upload
     }
 
 
+
     /// <summary>
     /// 指定ファイルをS3バケットにアップロードします
     /// </summary>
@@ -35,29 +35,42 @@ public class s3upload
     public void uploadFileToS3(string inputFileFullPath, string uploadS3path)
     {
         AmazonS3Client S3Client = new AmazonS3Client(credentials, regionVal);
+        TransferUtility fileTransferUtility = new TransferUtility(S3Client);
 
-        //ファイル読み込み
-        var stream = new FileStream(inputFileFullPath,
-            FileMode.Open, FileAccess.Read, FileShare.Read);
-
-        //リクエスト作成
-        var request = new PostObjectRequest()
-        {
-            Bucket = backetNameString,
-            Key = uploadS3path,
-            InputStream = stream,
-            CannedACL = S3CannedACL.Private
-        };
-
-        //アップロード
-        S3Client.PostObjectAsync(request, (responseObj) =>
-        {
-            if (responseObj.Exception == null)
-            {
-                //Success
-                Debug.Log(uploadS3path + "   :Upload successed");
-            }
-            else { Debug.LogError(string.Format("\n receieved error {0}", responseObj.Response.HttpStatusCode.ToString())); }
-        });
+        //ファイル転送
+        fileTransferUtility.Upload(inputFileFullPath, backetNameString, uploadS3path);
+        Console.WriteLine("Uploaded: " + uploadS3path);
     }
+
+    /// <summary>
+    /// 指定フォルダをS3バケットにアップロードします
+    /// </summary>
+    /// <param name="inputFileFullPath">アップロードするローカルフォルダパス</param>
+    /// <param name="uploadS3dir">S3パス。fol/と指定するとfolフォルダ以下にアップロードする</param>
+    public void uploadFolderToS3(string inputFolderFullPath, string uploadS3dir)
+    {
+        //uploadS3pathの末尾が/でない場合は/を付加
+        if (uploadS3dir.EndsWith("/")==false) { uploadS3dir = uploadS3dir + "/"; }
+        //inputFolderFullPathの末尾が\でない場合は\を付加
+        if (inputFolderFullPath.EndsWith("\\") == false) { inputFolderFullPath = inputFolderFullPath + "\\"; }
+
+        //ファイル一覧取得
+        System.IO.DirectoryInfo di = new System.IO.DirectoryInfo(inputFolderFullPath);
+        System.IO.FileInfo[] files =
+            di.GetFiles("*", System.IO.SearchOption.AllDirectories);
+
+        //１ファイルずつアップロード
+        foreach (System.IO.FileInfo f in files)
+        {
+            string uploadS3path;
+            uploadS3path = uploadS3dir + f.FullName.Replace(inputFolderFullPath, "");
+            uploadS3path = uploadS3path.Replace(@"\", "/");
+            uploadFileToS3(f.FullName, uploadS3path);
+        }
+
+
+    }
+
+
+
 }
