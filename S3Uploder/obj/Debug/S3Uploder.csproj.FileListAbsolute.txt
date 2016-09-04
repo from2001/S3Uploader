@@ -1,0 +1,6 @@
+c:\users\yamaguchi\documents\visual studio 2015\Projects\S3Uploder\S3Uploder\bin\Debug\S3Uploder.exe.config
+c:\users\yamaguchi\documents\visual studio 2015\Projects\S3Uploder\S3Uploder\bin\Debug\S3Uploder.exe
+c:\users\yamaguchi\documents\visual studio 2015\Projects\S3Uploder\S3Uploder\bin\Debug\S3Uploder.pdb
+c:\users\yamaguchi\documents\visual studio 2015\Projects\S3Uploder\S3Uploder\obj\Debug\S3Uploder.csprojResolveAssemblyReference.cache
+c:\users\yamaguchi\documents\visual studio 2015\Projects\S3Uploder\S3Uploder\obj\Debug\S3Uploder.exe
+c:\users\yamaguchi\documents\visual studio 2015\Projects\S3Uploder\S3Uploder\obj\Debug\S3Uploder.pdb
