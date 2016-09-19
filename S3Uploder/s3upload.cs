@@ -1,7 +1,5 @@
 ﻿using System;
 using Amazon.S3;
-using Amazon.S3.Model;
-using System.IO;
 using Amazon.CognitoIdentity;
 using Amazon;
 using Amazon.S3.Transfer;
@@ -9,23 +7,22 @@ using Amazon.S3.Transfer;
 public class s3upload
 {
     private CognitoAWSCredentials credentials;
-    private string backetNameString;
-    private RegionEndpoint regionVal;
+    private string g_backetNameString;
+    private string g_RegionSystemName_backet;
 
     /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="IdentityPoolId">CognitoのIdentify Pool ID</param>
     /// <param name="backetName">バケット名</param>
-    /// <param name="region">Region未指定の場合はUSEast1</param>
-    public s3upload(string IdentityPoolId, string backetName, RegionEndpoint region = null)
+    /// <param name="RegionSystemName"> us-west-1, ap-northeast-1, ap-south-1 etc..</param>
+    public s3upload(string IdentityPoolId, string RegionSystemName_backet, string backetName, string RegionSystemName_IdentityPoolId)
     {
-        if (region == null) { regionVal = RegionEndpoint.USEast1; }    //Region未指定の場合はUSEast1を設定
+        RegionEndpoint regionVal = RegionEndpoint.GetBySystemName(RegionSystemName_IdentityPoolId);
         credentials = new CognitoAWSCredentials(IdentityPoolId, regionVal);
-        backetNameString = backetName;
+        g_backetNameString = backetName;
+        g_RegionSystemName_backet = RegionSystemName_backet;
     }
-
-
 
     /// <summary>
     /// 指定ファイルをS3バケットにアップロードします
@@ -34,12 +31,14 @@ public class s3upload
     /// <param name="uploadS3path">S3パス。fol/filenameと指定するとfolフォルダ以下にアップロードする</param>
     public void uploadFileToS3(string inputFileFullPath, string uploadS3path)
     {
-        AmazonS3Client S3Client = new AmazonS3Client(credentials, regionVal);
+        RegionEndpoint Region_backet = RegionEndpoint.GetBySystemName(g_RegionSystemName_backet);
+        AmazonS3Client S3Client = new AmazonS3Client(credentials, Region_backet);
         TransferUtility fileTransferUtility = new TransferUtility(S3Client);
 
         //ファイル転送
-        fileTransferUtility.Upload(inputFileFullPath, backetNameString, uploadS3path);
+        fileTransferUtility.Upload(inputFileFullPath, g_backetNameString, uploadS3path);
         Console.WriteLine("Uploaded: " + uploadS3path);
+
     }
 
     /// <summary>
